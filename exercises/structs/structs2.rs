@@ -5,7 +5,6 @@
 // Execute `rustlings hint structs2` or use the `hint` watch subcommand for a
 // hint.
 
-// I AM NOT DONE
 
 #[derive(Debug)]
 struct Order {
@@ -37,8 +36,14 @@ mod tests {
     #[test]
     fn your_order() {
         let order_template = create_order_template();
-        // TODO: Create your own order using the update syntax and template above!
-        // let your_order =
+        // 使用结构体更新语法，我们可以通过更少的代码来达到相同的效果
+        // .. 语法指定了剩余未显式设置值的字段应有与给定实例对应字段相同的值。
+        // 这里的赋值一样要遵循所有权规则
+        let your_order = Order {
+            name: String::from("Hacker in Rust"),
+            count: 1,
+            ..order_template
+        };
         assert_eq!(your_order.name, "Hacker in Rust");
         assert_eq!(your_order.year, order_template.year);
         assert_eq!(your_order.made_by_phone, order_template.made_by_phone);
