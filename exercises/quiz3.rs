@@ -16,16 +16,21 @@
 //
 // Execute `rustlings hint quiz3` or use the `hint` watch subcommand for a hint.
 
-// I AM NOT DONE
-
-pub struct ReportCard {
-    pub grade: f32,
+pub struct ReportCard <T> {
+    pub grade: T,
     pub student_name: String,
     pub student_age: u8,
 }
 
-impl ReportCard {
-    pub fn print(&self) -> String {
+use std::fmt::Display;
+
+pub trait Printable {
+    fn print(&self) -> String;
+}
+
+// 对于 Display trait 的类型 T 实现 Printable trait
+impl<T: Display> Printable for ReportCard<T> {
+    fn print(&self) -> String {
         format!("{} ({}) - achieved a grade of {}",
             &self.student_name, &self.student_age, &self.grade)
     }
@@ -52,7 +57,7 @@ mod tests {
     fn generate_alphabetic_report_card() {
         // TODO: Make sure to change the grade here after you finish the exercise.
         let report_card = ReportCard {
-            grade: 2.1,
+            grade: "A+".to_string(),
             student_name: "Gary Plotter".to_string(),
             student_age: 11,
         };
