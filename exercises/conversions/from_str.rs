@@ -9,6 +9,9 @@
 // Execute `rustlings hint from_str` or use the `hint` watch subcommand for a
 // hint.
 
+// 当一个类型实现FromStr trait后，调用字符串的泛型函数str.parse()
+// 就可以很方便的实现字符串到某个具体类型的转换。
+
 use std::num::ParseIntError;
 use std::str::FromStr;
 
@@ -31,7 +34,6 @@ enum ParsePersonError {
     ParseInt(ParseIntError),
 }
 
-// I AM NOT DONE
 
 // Steps:
 // 1. If the length of the provided string is 0, an error should be returned
@@ -52,6 +54,20 @@ enum ParsePersonError {
 impl FromStr for Person {
     type Err = ParsePersonError;
     fn from_str(s: &str) -> Result<Person, Self::Err> {
+        if s.is_empty() {
+            return Err(ParsePersonError::Empty);
+        }
+        let parts: Vec<&str> = s.split(',').collect();
+        if parts.len() != 2 {
+            return Err(ParsePersonError::BadLen);
+        }
+        let name = parts[0];
+        if name.is_empty() {
+            return Err(ParsePersonError::NoName);
+        }
+        let age_str = parts[1];
+        let age = age_str.parse::<usize>().map_err(ParsePersonError::ParseInt)?;
+        Ok(Person { name: name.to_string(), age })
     }
 }
 
