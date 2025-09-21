@@ -3,7 +3,7 @@
 	This problem requires you to implement a basic interface for a binary tree
 */
 
-//I AM NOT DONE
+
 use std::cmp::Ordering;
 use std::fmt::Debug;
 
@@ -50,13 +50,54 @@ where
 
     // Insert a value into the BST
     fn insert(&mut self, value: T) {
-        //TODO
+        // Box 类型只允许一个所有者
+        if self.root.is_none() {
+            self.root = Some(Box::new(TreeNode::new(value)));
+            return;
+        }
+        let mut curr = self.root.as_mut().unwrap();
+        loop {
+            match value.cmp(&curr.value) {
+                Ordering::Less => {
+                    // 检查 curr.left 是否为 None，而不是获取可变借用
+                    if curr.left.is_none() {
+                        curr.left = Some(Box::new(TreeNode::new(value)));
+                        return;
+                    } else {
+                        // 在确认 left 存在后安全地移动 curr
+                        curr = curr.left.as_mut().unwrap();
+                    }
+                }
+                Ordering::Greater => {
+                    if curr.right.is_none() {
+                        curr.right = Some(Box::new(TreeNode::new(value)));
+                        return;
+                    } else {
+                        curr = curr.right.as_mut().unwrap();
+                    }
+                }
+                Ordering::Equal => {
+                    // Value already exists in the tree, do nothing
+                    return;
+                }
+                
+            }
+        }
     }
 
     // Search for a value in the BST
     fn search(&self, value: T) -> bool {
-        //TODO
-        true
+        let mut current = &self.root;
+        
+        while let Some(node) = current {
+            match value.cmp(&node.value) {
+                Ordering::Less => current = &node.left,
+                Ordering::Greater => current = &node.right,
+                Ordering::Equal => return true,
+            }
+        }
+        
+        false
     }
 }
 
@@ -66,7 +107,25 @@ where
 {
     // Insert a node into the tree
     fn insert(&mut self, value: T) {
-        //TODO
+        match value.cmp(&self.value) {
+            Ordering::Less => {
+                if self.left.is_none() {
+                    self.left = Some(Box::new(TreeNode::new(value)));
+                } else {
+                    self.left.as_mut().unwrap().insert(value);
+                }
+            },
+            Ordering::Greater => {
+                if self.right.is_none() {
+                    self.right = Some(Box::new(TreeNode::new(value)));
+                } else {
+                    self.right.as_mut().unwrap().insert(value);
+                }
+            },
+            Ordering::Equal => {
+                // 值已存在，不做任何操作
+            }
+        }
     }
 }
 

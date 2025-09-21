@@ -2,11 +2,9 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
-use std::vec::*;
 
 #[derive(Debug)]
 struct Node<T> {
@@ -29,13 +27,14 @@ struct LinkedList<T> {
     end: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Default for LinkedList<T> {
+impl<T: PartialOrd + Clone> Default for LinkedList<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> LinkedList<T> {
+// restricting type parameter `T` with trait `PartialOrd` and `Clone`
+impl<T: PartialOrd + Clone> LinkedList<T> {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -71,12 +70,41 @@ impl<T> LinkedList<T> {
     }
 	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
 	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+        let mut res = LinkedList::<T>::new();
+        let mut ptr_a = list_a.start;
+        let mut ptr_b = list_b.start;
+        while ptr_a.is_some() && ptr_b.is_some() {
+            let val_a = unsafe {
+                // 使用 clone() 克隆值，避免所有权问题
+                (*ptr_a.unwrap().as_ptr()).val.clone()
+            };
+            let val_b = unsafe {
+                (*ptr_b.unwrap().as_ptr()).val.clone()
+            };
+            if val_a <= val_b {
+                res.add(val_a);
+                ptr_a = unsafe { ptr_a.unwrap().as_ref().next };
+            } else {
+                res.add(val_b);
+                ptr_b = unsafe { ptr_b.unwrap().as_ref().next };
+            }
         }
+        while ptr_a.is_some() {
+            let val_a = unsafe {
+                (*ptr_a.unwrap().as_ptr()).val.clone()
+            };
+            res.add(val_a);
+            ptr_a = unsafe { ptr_a.unwrap().as_ref().next };
+        }
+        while ptr_b.is_some() {
+            let val_b = unsafe {
+                (*ptr_b.unwrap().as_ptr()).val.clone()
+            };
+            res.add(val_b);
+            ptr_b = unsafe { ptr_b.unwrap().as_ref().next };
+        }
+
+		res
 	}
 }
 

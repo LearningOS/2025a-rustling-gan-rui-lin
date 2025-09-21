@@ -2,7 +2,6 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -16,14 +15,15 @@ where
     comparator: fn(&T, &T) -> bool,
 }
 
-impl<T> Heap<T>
+impl<T:PartialOrd> Heap<T>
 where
     T: Default,
 {
     pub fn new(comparator: fn(&T, &T) -> bool) -> Self {
+        // 创建一个带有占位符的向量（索引 0 不使用）
         Self {
             count: 0,
-            items: vec![T::default()],
+            items: vec![T::default()], // 索引 0 是占位符，不参与堆操作
             comparator,
         }
     }
@@ -37,7 +37,23 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.items.push(value);
+        self.count += 1;
+        
+        // 执行上浮操作，维护堆的性质
+        let mut curr_idx = self.count;
+        
+        while curr_idx > 1 {
+            let parent_idx = self.parent_idx(curr_idx);
+            
+            // 如果当前节点满足堆的比较条件（对小根堆是较小，对大根堆是较大）
+            if (self.comparator)(&self.items[curr_idx], &self.items[parent_idx]) {
+                self.items.swap(curr_idx, parent_idx);
+                curr_idx = parent_idx;
+            } else {
+                break;
+            }
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -57,8 +73,20 @@ where
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+        // 如果只有左子节点，返回左子节点
+        let left_idx = self.left_child_idx(idx);
+        let right_idx = self.right_child_idx(idx);
+        
+        if right_idx > self.count {
+            return left_idx;
+        }
+        
+        // 使用 comparator 函数比较左右子节点，返回满足堆性质的最佳子节点
+        if (self.comparator)(&self.items[left_idx], &self.items[right_idx]) {
+            left_idx
+        } else {
+            right_idx
+        }
     }
 }
 
@@ -77,15 +105,46 @@ where
     }
 }
 
-impl<T> Iterator for Heap<T>
+impl<T:PartialOrd> Iterator for Heap<T>
 where
     T: Default,
 {
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.count == 0 {
+            return None;
+        }
+        
+        // 保存堆顶元素
+        let top = std::mem::replace(&mut self.items[1], T::default());
+        
+        // 如果这是最后一个元素，直接返回
+        if self.count == 1 {
+            self.count = 0;
+            self.items.pop(); // 移除最后一个元素（原堆顶）
+            return Some(top);
+        }
+        
+        // 将最后一个元素移到堆顶，并从数组中移除
+        let last = self.items.pop().unwrap();
+        self.items[1] = last;
+        self.count -= 1;
+        
+        // 向下调整堆
+        let mut current = 1;
+        while self.children_present(current) {
+            let smallest_child = self.smallest_child_idx(current);
+            
+            if (self.comparator)(&self.items[smallest_child], &self.items[current]) {
+                self.items.swap(smallest_child, current);
+                current = smallest_child;
+            } else {
+                break;
+            }
+        }
+        
+        Some(top)
     }
 }
 

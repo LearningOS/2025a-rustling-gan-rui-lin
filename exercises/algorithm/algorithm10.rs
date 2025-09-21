@@ -2,7 +2,6 @@
 	graph
 	This problem requires you to implement a basic graph functio
 */
-// I AM NOT DONE
 
 use std::collections::{HashMap, HashSet};
 use std::fmt;
@@ -29,19 +28,42 @@ impl Graph for UndirectedGraph {
         &self.adjacency_table
     }
     fn add_edge(&mut self, edge: (&str, &str, i32)) {
-        //TODO
+        // 在邻接表中插入或获取起始节点 edge.0 的邻居列表
+        self.adjacency_table
+            .entry(edge.0.to_string())
+            // 如果没有该节点，则插入一个新的空 Vec
+            .or_insert_with(Vec::new)
+            // 将目标节点 edge.1 和权重 edge.2 加入邻居列表
+            .push((edge.1.to_string(), edge.2));
+        
+        self.adjacency_table
+            .entry(edge.1.to_string())
+            .or_insert_with(Vec::new)
+            .push((edge.0.to_string(), edge.2));
     }
 }
+// 通用 trait 的方法
 pub trait Graph {
     fn new() -> Self;
     fn adjacency_table_mutable(&mut self) -> &mut HashMap<String, Vec<(String, i32)>>;
     fn adjacency_table(&self) -> &HashMap<String, Vec<(String, i32)>>;
     fn add_node(&mut self, node: &str) -> bool {
-        //TODO
+        if self.contains(node) {
+            return false;
+        }
+        self.adjacency_table_mutable()
+            .insert(node.to_string(), Vec::new());
 		true
     }
     fn add_edge(&mut self, edge: (&str, &str, i32)) {
-        //TODO
+        self.adjacency_table_mutable()
+            .entry(edge.0.to_string())
+            .or_insert_with(Vec::new)
+            .push((edge.1.to_string(), edge.2));
+        // self.adjacency_table_mutable()
+        //     .entry(edge.1.to_string())
+        //     .or_insert_with(Vec::new)
+        //     .push((edge.0.to_string(), edge.2));
     }
     fn contains(&self, node: &str) -> bool {
         self.adjacency_table().get(node).is_some()
